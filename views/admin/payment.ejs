@@ -1,0 +1,56 @@
+<%-include('../layouts/admin_header.ejs')%>
+<h1 class="text-center">All Payments here</h1>
+<hr />
+<div class="container">
+  <div class="row">
+    <%users.forEach(user=>{%>
+    <div class="col-sm-12">
+      <div class="avatar white text-center">
+        <img
+          src="https://mdbootstrap.com/img/Photos/Avatars/img%20(9).jpg"
+          width="90px"
+          height="90px"
+          class="img-fluid rounded-circle z-depth-1"
+        />
+      </div>
+      <div class="text-center mt-2">
+        <h6 class="font-weight-bold pt-2 mb-0"><%=user.name%></h6>
+        <p class="text-muted mb-0"><small></small></p>
+      </div>
+      <table class="table table-striped table-bordered">
+        <thead>
+          <tr>
+            <th>Payment Date</th>
+            <th>Payment Id</th>
+            <th>Amount Paid</th>
+            <th>Total</th>
+
+            <!-- <th scope="col">Amount</th> -->
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <% let total=0 %> 
+            <%user.payment.map(pay=>{ %>
+            <td><%=pay.date.toDateString()%></td>
+            <td><%=pay._id%></td>
+            <td>₵<%=pay.amount%></td>
+            <%total+=parseFloat(pay.amount)%>
+            <td><%=total%></td>
+
+            <td><a href="/admin/edit/payment/<%=user._id%>" class="btn btn-outline-warning">Edit Payment</a></td>
+            <td>
+              <form action="/admin/deletepayment/<%=pay._id%>?_method=DELETE" method="POST">
+              <button type="submit" class="btn btn-outline-danger">Delete Payment</button>
+            </form>
+            </td>
+          </tr>
+          <% })%>
+        </tbody>
+      </table>
+    </div>
+    <%})%>
+  </div>
+</div>
+
+<%-include('../layouts/admin_footer.ejs')%>

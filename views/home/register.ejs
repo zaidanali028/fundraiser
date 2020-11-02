@@ -1,0 +1,27 @@
+<%-include('../layouts/home_header.ejs')%>
+<form action="/register" method="POST">
+<label for="name">Name</label>
+<input type="text" name="name" id="">
+
+<label for="name">Email</label>
+<input type="text" name="email" id="">
+<!-- 
+<label for="name">Password</label>
+<input type="text" name="password" id=""> -->
+<label for="sex">Sex</label>
+Male<input type="radio" name="sex"  value="Male" id="">
+Female<input type="radio" name="sex" value="Female" id="">
+
+<label for="Phone Number">Phone Number</label>
+<input type="text" name="phoneNumber" id="">
+
+<label for="Location">Location</label>
+<input type="text" name="location" id="">
+
+<label for="reason">What Is Making You See The Need To Join Us</label>
+<textarea name="reason" id="" cols="30" rows="10"></textarea>
+
+<button type="submit">Register</button>
+</form>
+
+<%-include('../layouts/home_footer.ejs')%>
