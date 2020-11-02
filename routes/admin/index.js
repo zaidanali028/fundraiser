@@ -55,7 +55,7 @@ router.post('/edit/payment/:id',(req,res)=>{
     console.log(req.body)
 })
 
-//deleting payment
+//deleting payment route
 router.delete('/deletepayment/:id',(req,res)=>{
    // res.send('deleted')
    const {id}=req.params
