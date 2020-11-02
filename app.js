@@ -22,10 +22,10 @@ app.set(express.static(path.join(__dirname, "public")));
 const homeRoutes=require('./routes/home/index')
 const adminRoutes=require('./routes/admin/index')
 
-//body-parser
+//body-parser here
 app.use(express.urlencoded({extended:false}))
 
-//method override middleware
+//method override middleware 
 app.use(methodOverride("_method"));
 
 
