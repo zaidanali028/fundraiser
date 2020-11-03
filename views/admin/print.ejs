@@ -47,7 +47,7 @@
     </div>
   </div>
 </div>
-
+<button class="btn btn-success h-25 mt-4" onclick="exec()">Print Statement</button>
 </div>
 
 <div class="container">
@@ -86,15 +86,7 @@
             <td>₵<%=pay.amount%></td>
             <%total+=parseFloat(pay.amount)%>
             <td><%=total%></td>
-
-            <td><a href="/admin/edit/payment/<%=pay._id%>" class="btn btn-outline-warning">Edit Payment</a></td>
-            <td>
-              <form action="/admin/deletepayment/<%=pay._id%>?_method=DELETE" method="POST">
-              <button type="submit" class="btn btn-outline-danger" 
-              onclick="return confirm('Are You Sure You Want To Delete This Payment?')">Delete Payment</button>
-            </form>
-            </td>
-          </tr>
+        </tr>
           <% })%>
         </tbody>
       </table>

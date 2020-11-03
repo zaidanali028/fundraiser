@@ -3,14 +3,8 @@
   Edit Existing Payment Of Organization Members here
 </h3>
 <hr />
-<form action="/admin/edit/payment/<%=user._id%>" method="POST">
-  <div class="form-group">
-    <label for="status">Payer</label>
-    <select name="members" id="" class="form-control">
-      <option value="<%=user._id%>"><%=user.name%></option>
-    </select>
-  </div>
-
+<form action="/admin/edit/payment/<%=payment._id%>" method="POST">
+  
   <div class="form-group">
     <label for="amount">Amount</label>
     <select name="amount" id="" class="form-control">

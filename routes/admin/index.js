@@ -9,10 +9,52 @@ router.get("/", (req, res) => {
 });
 
 router.get("/payments", (req, res) => {
+  //Monthly payments
+  // let paymentArray1=[]
+  // Payment.aggregate([
+  //     {
+  //         $project:{
+  //             month:{$month:"$date"}
+  //         }
+  //     }
+  // ]).then(res=>{
+  //     //console.log(res)
+  //     res.forEach(response=>{
+  //        if(response.month==11){
+  //         // console.log(response.month)
+  //         Payment.findById(response._id)
+  //         .then(payment=>{
+  //         //console.log(payment.amount)
+  //         paymentArray1.push(payment.amount)
+  //         console.log(paymentArray1)
+  //         })
+
+  //        }
+
+  //     })
+
+  // })
+
   User.find({})
-.populate("payment")
+    .populate("payment")
     .then((users) => {
-      res.render("admin/payment", { users });
+      Payment.find({}).then((allPAyments) => {
+        let paymentArray = [];
+
+        allPAyments.forEach((payment) => {
+          paymentArray.push(payment.amount);
+        });
+        //initially,total will be 0 and amount will be the frst value in the array
+        //then the second loop will have the first value in the array as total ,then
+        //add the second value to the first on,till the length of the array exhausts
+        const sum = paymentArray.reduce(function (total, amount) {
+          return total + amount;
+        });
+        // console.log(sum)
+        // console.log(paymentArray)
+
+        res.render("admin/payment", { users, sum });
+      });
     });
 });
 //making payment
@@ -41,31 +83,57 @@ router.post("/pateron/pay/", (req, res) => {
   });
 });
 
-router.get('/edit/payment/:id',(req,res)=>{
-    const userId=req.params.id
-    User.findOne({_id:userId}).then(user=>{
-    res.render('admin/editpayment',{user})
-
-
-    })
-})
-//Blocker Here
-router.post('/edit/payment/:id',(req,res)=>{
-    Payment.findByIdAndUpdate
-    console.log(req.body)
-})
+router.get("/edit/payment/:id", (req, res) => {
+  const amountId = req.params.id;
+  Payment.findOne({ _id: amountId }).then((payment) => {
+    res.render("admin/editpayment", { payment });
+  });
+});
+router.post("/edit/payment/:id", (req, res) => {
+  const amountId = req.params.id;
+  const newAmount = req.body.amount;
+  console.log(newAmount);
+  //     Payment.findOne({_id:amountId}).then(payment=>{
+  //         payment.amount=newAmount
+  //    res.redirect('/admin/payments')
+  Payment.findByIdAndUpdate(
+    { _id: amountId },
+    {
+      $set: {
+        amount: newAmount,
+      },
+    }
+  ).then((updatedPayment) => {
+    res.redirect("/admin/payments");
+  });
+});
 
 //deleting payment route
-router.delete('/deletepayment/:id',(req,res)=>{
-   // res.send('deleted')
-   const {id}=req.params
-   Payment.findOneAndDelete({_id:id}).then(payment=>{
-       payment.remove()
-       res.redirect('/admin/payments')
-   })
-})
+router.delete("/deletepayment/:id", (req, res) => {
+  // res.send('deleted')
+  const { id } = req.params;
+  Payment.findOneAndDelete({ _id: id }).then((payment) => {
+    payment.remove();
+    res.redirect("/admin/payments");
+  });
+});
 //Stats route
-router.get('/stats',(req,res)=>{
-    res.send('statistics')
-})
+router.get("/print", (req, res) => {
+  User.find({})
+    .populate("payment")
+    .then((users) => {
+      Payment.find({}).then((allPAyments) => {
+        let paymentArray = [];
+
+        allPAyments.forEach((payment) => {
+          paymentArray.push(payment.amount);
+        });
+
+        const sum = paymentArray.reduce(function (total, amount) {
+          return total + amount;
+        });
+        res.render("admin/print", { users, sum });
+      });
+    });
+});
 module.exports = router;
