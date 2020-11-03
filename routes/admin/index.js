@@ -8,7 +8,7 @@ router.get("/", (req, res) => {
   res.render("admin/index");
 });
 
-router.get("/payments", (req, res) => {
+router.get("/payments", async (req, res) => {
   //Monthly payments
   // let paymentArray1=[]
   // Payment.aggregate([
@@ -35,7 +35,25 @@ router.get("/payments", (req, res) => {
 
   // })
 
-  User.find({})
+  let totalForMonth = 0;
+   const currentMonth = new Date().getMonth() + 1 // Get current month
+   const currentYear  = new Date().getFullYear(); // Get current year
+
+  // get all payments from the database
+   const allPayments = await Payment.find({});
+
+  for (const singlePayment of allPayments) {
+     let currentM = new Date(singlePayment.createdAt).getMonth() + 1;
+     let currentY = new Date(singlePayment.createdAt).getFullYear();
+
+      if (currentM === currentMonth && currentY === currentYear){
+        totalForMonth += parseFloat(singlePayment.amount);
+      }
+  }
+
+
+
+  await User.find({})
     .populate("payment")
     .then((users) => {
       Payment.find({}).then((allPAyments) => {
@@ -53,10 +71,17 @@ router.get("/payments", (req, res) => {
         // console.log(sum)
         // console.log(paymentArray)
 
-        res.render("admin/payment", { users, sum });
+        res.render("admin/payment", { users, sum, totalForMonth});
       });
     });
+
+
 });
+
+
+
+
+
 //making payment
 router.get("/newpayment", (req, res) => {
   User.find({}).then((users) => {
