@@ -23,7 +23,7 @@
       <div class="row no-gutters align-items-center">
         <div class="col mr-2">
           <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Monthly Earnings</div>
-          <div class="h5 mb-0 font-weight-bold text-gray-800">₵<%=sum%>.00</div>
+          <div class="h5 mb-0 font-weight-bold text-gray-800">₵<%= totalForMonth %>.00</div>
         </div>
         <div class="col-auto">
           <i class="fas fa-calendar fa-2x text-gray-300" ></i>
@@ -81,7 +81,7 @@
           <tr>
             <% let total=0 %> 
             <%user.payment.map(pay=>{ %>
-            <td><%=pay.date.toDateString()%></td>
+            <td><%= new Date(pay.createdAt).toDateString() %></td>
             <td><%=pay._id%></td>
             <td>₵<%=pay.amount%></td>
             <%total+=parseFloat(pay.amount)%>
