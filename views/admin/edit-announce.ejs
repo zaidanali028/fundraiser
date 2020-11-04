@@ -1,7 +1,7 @@
 <%-include('../layouts/admin_header.ejs')%>
 <div class="container-fluid">
   <div class="row">
-    <table class="table table-hover table-primary table-responsive-lg">
+    <table class="table table-hover table-primary table-responsive-md">
       <thead>
         <tr>
           <th scope="col">Member's Name</th>
@@ -49,11 +49,11 @@
       <form
         method="POST"
         class="text-center border border-light p-5"
-        action="/admin/users/announce/"
+        action="/admin/edit/announcement/<%=foundAnnouncement._id%>"
         method="POST"
       >
         <p class="h4 mb-4 text-success">
-          <i class="fas fa-bullhorn"> Broadcast To Website Visitors</i>
+          <i class="fas fa-bullhorn"> Edit This Broadcast </i>
         </p>
 
         <!-- Message -->
@@ -65,19 +65,19 @@
             cols="10"
             placeholder="Message"
             name="message"
-          ></textarea>
+          ><%=foundAnnouncement.message%></textarea>
         </div>
 
         <!-- Send button -->
         <button class="btn btn-outline-success btn-block" type="submit">
-          Send
+          Edit This Annoucement
         </button>
       </form>
 
       <!-- Default form contact -->
     </div>
     <div class=" col-md-8">
-      <table class="table table-striped table-bordered">
+      <table class="table table-striped table-bordered table-responsive-md">
         <thead>
           <tr>
             <th> Broadcast Date</th>
@@ -91,13 +91,6 @@
                 <tr>
                     <td><%=announcement.date.toDateString()%></td>
                     <td><%=announcement.message%></td>
-                    <td><a href="/admin/edit/announcement/<%=announcement._id%>" class="btn btn-outline-warning">Edit Announcement</a></td>
-                    <td>
-                      <form action="/admin/delete/announcement/<%=announcement._id%>?_method=DELETE" method="POST">
-                      <button type="submit" class="btn btn-outline-danger" 
-                      onclick="return confirm('Are You Sure You Want To Delete This Announcement?')">Delete Announcement</button>
-                    </form>
-                    </td>
 
                 </tr>
 

@@ -4,11 +4,24 @@ const { Router } = require("express");
 const express = require("express");
 const router = express.Router();
 const sgMail = require("@sendgrid/mail");
-const Announcements=require('../../models/Announce')
-const key ="SENDGRID_API_KEY";
+const Announcements = require("../../models/Announce");
+const Questionaire = require("../../models/Questionaire");
+const key = "SENDGRID_API_KEY";
 
 router.get("/", (req, res) => {
-  res.render("admin/index");
+  let novemberData=''
+  const Currentmonth=new Date().getMonth()+1
+  Payment.find({})
+  .then(payments=>{
+    payments.forEach(payment=>{
+      const dbMonth=new Date(payment.createdAt).getMonth()+1
+      if(Currentmonth===11&&Currentmonth===dbMonth){
+       novemberData=Payment.countDocuments({})
+        console.log(novemberData)
+      }
+      res.render('admin/index',{novemberData})
+    })
+  })
 });
 
 router.get("/payments", async (req, res) => {
@@ -240,7 +253,6 @@ router.post("/user/email/:id", (req, res) => {
   const { subject } = req.body;
   const { message } = req.body;
   User.findById(userId).then((user) => {
-    
     sgMail.setApiKey(key);
     const msg = {
       to: user.email, // Change to your recipient
@@ -275,7 +287,6 @@ router.post("/users/email", (req, res) => {
   const { subject, message } = req.body;
   User.find({}).then((allUsers) => {
     allUsers.forEach((user) => {
-      
       sgMail.setApiKey(key);
       const msg = {
         to: user.email, // Change to your recipient
@@ -299,25 +310,187 @@ router.post("/users/email", (req, res) => {
 
 router.get("/users/announce/", (req, res) => {
   User.find({}).then((users) => {
-    Announcements.find({})
-    .then(allAnnouncements=>{
-    res.render("admin/announce", { users ,allAnnouncements});
-
-
-    })
+    Announcements.find({}).then((allAnnouncements) => {
+      res.render("admin/announce", { users, allAnnouncements });
+    });
   });
 });
 router.post("/users/announce/", (req, res) => {
-  const {message} =req.body
-  const Announce=new Announcements({
-    message
-  })
-  Announce.save()
-  .then(newAnnouncement=>{
-   res.redirect('/admin/users/announce')
-
-
-  })
+  const { message } = req.body;
+  const Announce = new Announcements({
+    message,
+  });
+  Announce.save().then((newAnnouncement) => {
+    res.redirect("/admin/users/announce");
+  });
 });
+router.get("/edit/announcement/:id", (req, res) => {
+  User.find({}).then((users) => {
+    Announcements.find({}).then((allAnnouncements) => {
+      Announcements.findById(req.params.id).then((foundAnnouncement) => {
+        res.render("admin/edit-announce", {
+          users,
+          allAnnouncements,
+          foundAnnouncement,
+        });
+      });
+    });
+  });
+
+  //res.send('edit route')
+});
+
+router.post("/edit/announcement/:id", (req, res) => {
+  // res.send('working')
+  const announcementId = req.params.id;
+  const msgUpdate = req.body.message;
+  Announcements.findOneAndUpdate(
+    { _id: announcementId },
+    {
+      $set: {
+        message: msgUpdate,
+      },
+    }
+  ).then((updatedMsg) => {
+    res.redirect("/admin/users/announce");
+  });
+});
+
+router.delete("/delete/announcement/:id", (req, res) => {
+  const announcementId = req.params.id;
+  // res.send('delete announcement')
+  Announcements.findByIdAndDelete({ _id: announcementId }).then(
+    (announcement) => {
+      announcement.remove();
+      res.redirect("/admin/users/announce");
+    }
+  );
+});
+
+router.get("/users/questionaire/", (req, res) => {
+  User.find({}).then((users) => {
+    Questionaire.find({}).then((allQuestions) => {
+      res.render("admin/questionaire", { users, allQuestions });
+    });
+  });
+});
+
+router.post("/users/questionaire/", (req, res) => {
+  const { question, answer } = req.body;
+  // console.log(question,answer)
+  const questAns = new Questionaire({
+    question,
+    answer,
+  });
+  questAns.save().then((questAnsSaved) => {
+    res.redirect("/admin/users/questionaire");
+  });
+});
+router.get("/edit/questionaire/:id", (req, res) => {
+  const questionId = req.params.id;
+  User.find({}).then((users) => {
+    Questionaire.findById(questionId).then((questionAndAns) => {
+      Questionaire.find({}).then((allQuestions) => {
+        res.render("admin/edit-questionaire", {
+          questionAndAns,
+          users,
+          allQuestions,
+        });
+      });
+    });
+  });
+});
+
+//Update Questionaire
+router.post("/users/questionaire/:id", (req, res) => {
+  const questionId = req.params.id;
+  const { question, answer } = req.body;
+  // console.log(question,answer)
+  Questionaire.findByIdAndUpdate(
+    { _id: questionId },
+    {
+      $set: {
+        question,
+        answer,
+      },
+    }
+  ).then((updatedQA) => {
+    //flash msg here
+    res.redirect("/admin/users/questionaire");
+  });
+  // res.send('workoingfwefrig')
+});
+
+router.delete("/delete/questionaire/:id", (req, res) => {
+  questionId = req.params.id;
+  Questionaire.findByIdAndDelete({ _id: questionId }).then((question) => {
+    question.remove();
+    res.redirect("/admin/users/questionaire");
+  });
+});
+router.get("/edituser/:id", (req, res) => {
+  const userId = req.params.id;
+  User.findOne({ _id: userId }).then((user) => {
+    res.render("admin/edituser", { user });
+  });
+});
+router.post("/edituser/:id", (req, res) => {
+  const {
+    name,
+    email,
+    password,
+    sex,
+    location,
+    reason,
+  } = req.body;
+  let {phoneNumber}=req.body
+  let userId=req.params.id
+
+
+
+  
+  function isNotEmpty(object) {
+    //am  checking if there is a key(uploader) in the object ,and if there is ,we will return true or false otherwise
+    for (let key in object) {
+      // console.log(key)
+      if (object.hasOwnProperty(key)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  let fileName = "";
+  //console.log(req.files)
+  if (isNotEmpty(req.files)) {
+    const fileObject = req.files.uploader;
+    console.log(fileObject)
+    fileName = new Date().getSeconds() + "-" + fileObject.name;
+    //the new Date().getSeconds+'-'+ is there to prevent duplicate picturename
+    fileObject.mv("./public/uploads/" + fileName, (err) => {
+      if (err) console.log(err);
+      console.log("has something");
+    });
+  } else {
+    console.log("has nothing");
+  }
+ 
+  User.findByIdAndUpdate({_id:userId},{$set:{
+    name,
+    email,
+    password,
+    sex,
+    location,
+    reason,
+    phoneNumber,
+    uploader:fileName
+  
+  }})
+  .then(userUpdate=>{
+    res.redirect('/admin/payments')
+  
+  
+  })
+})
+
 
 module.exports = router;

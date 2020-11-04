@@ -10,6 +10,10 @@ const User = new mongoose.Schema(
     name: {
       type: String,
     },
+    date: {
+      type: Date,
+      default:new Date
+    },
     email: {
       type: String,
     },
