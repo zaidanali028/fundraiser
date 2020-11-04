@@ -1,5 +1,5 @@
 <%-include('../layouts/home_header.ejs')%>
-<form action="/register" method="POST">
+<form action="/register" method="POST" enctype="multipart/form-data">
 <label for="name">Name</label>
 <input type="text" name="name" id="">
 
@@ -8,6 +8,8 @@
 <!-- 
 <label for="name">Password</label>
 <input type="text" name="password" id=""> -->
+<label for="file">Your Picture</label>
+<input type="file" name="uploader">
 <label for="sex">Sex</label>
 Male<input type="radio" name="sex"  value="Male" id="">
 Female<input type="radio" name="sex" value="Female" id="">

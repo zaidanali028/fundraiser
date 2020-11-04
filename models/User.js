@@ -16,6 +16,10 @@ const User = new mongoose.Schema(
     password: {
       type: String,
     },
+    uploader:{
+      type:String,
+     
+  },
 
     sex: {
       type: String,
