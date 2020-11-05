@@ -6,7 +6,6 @@ const router = express.Router();
 const sgMail = require("@sendgrid/mail");
 const Announcements = require("../../models/Announce");
 const Questionaire = require("../../models/Questionaire");
-const key = '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'
 
 
 router.get("/", (req, res) => {
