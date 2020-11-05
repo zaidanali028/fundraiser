@@ -6,7 +6,8 @@ const router = express.Router();
 const sgMail = require("@sendgrid/mail");
 const Announcements = require("../../models/Announce");
 const Questionaire = require("../../models/Questionaire");
-const key = "SENDGRID_API_KEY";
+const key = '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'
+
 
 router.get("/", (req, res) => {
   let novemberData=''
@@ -249,10 +250,35 @@ router.get("/user/email/:id", (req, res) => {
 });
 
 router.post("/user/email/:id", (req, res) => {
+// console.log(req.body)
+  let errors=[]
   const userId = req.params.id;
   const { subject } = req.body;
   const { message } = req.body;
-  User.findById(userId).then((user) => {
+  
+  if(!subject || !message){
+    errors.push({ msg: "Please fill in All Fields" });
+}
+if (errors.length > 0) {
+  User.find({}).then(users=>{
+    User.findById(userId)
+    .then(aUser=>{
+      return res.render('admin/interact-form',{
+        errors,
+        subject,
+        message,
+        users,
+        aUser
+      })
+
+    })
+   
+
+  })
+
+
+}
+   User.findById(userId).then((user) => {
     sgMail.setApiKey(key);
     const msg = {
       to: user.email, // Change to your recipient
@@ -264,6 +290,10 @@ router.post("/user/email/:id", (req, res) => {
       .send(msg)
       .then(() => {
         console.log("Email sent");
+        req.flash(
+          "success_msg",
+          `Successfully sent an email to post with title ${user.name}`
+        );
         res.redirect("/admin/interact");
       })
       .catch((error) => {
@@ -285,6 +315,32 @@ router.get("/users/email", (req, res) => {
 
 router.post("/users/email", (req, res) => {
   const { subject, message } = req.body;
+  let errors=[]
+  const userId = req.params.id;
+ 
+  
+  if(!subject || !message){
+    errors.push({ msg: "Please fill in All Fields" });
+}
+if (errors.length > 0) {
+  User.find({})
+  .then(users=>{
+    User.count({}).then((userCount) => {
+
+    return res.render('admin/mailall',{
+      errors,
+      subject,
+      message,
+      users,
+      userCount
+      
+    })
+
+  })
+})
+
+
+}
   User.find({}).then((allUsers) => {
     allUsers.forEach((user) => {
       sgMail.setApiKey(key);
@@ -298,7 +354,13 @@ router.post("/users/email", (req, res) => {
         .send(msg)
         .then(() => {
           console.log("Email sent to all members");
-          res.redirect("/admin/users/email");
+          
+          req.flash(
+            "success_msg",
+            `Successfully Sent All-Emails`
+          );
+          res.redirect("/admin/interact");
+          
         })
         .catch((error) => {
           console.error(error);
@@ -315,14 +377,40 @@ router.get("/users/announce/", (req, res) => {
     });
   });
 });
+//validation stage
 router.post("/users/announce/", (req, res) => {
-  const { message } = req.body;
-  const Announce = new Announcements({
+  let errors=[]
+const { message } = req.body;
+if (!message) {
+  errors.push({ msg: "Please Fill This Form Field" });
+}
+if (message.length >= 50) {
+  errors.push({ msg: "Announcemet Message must be exactly 50 characters or less" });
+// req.flash("error_msg", "Announcemet Message must be exactly 50 words or less");
+
+}
+//console.log(errors)
+
+if (errors.length > 0) {
+  User.find({})
+    .then(users=>{
+      Announcements.find({})
+      .then(allAnnouncements=>{
+        return res.render('admin/announce',{users,allAnnouncements,message,errors})
+      })
+    })
+
+}
+else{  
+const Announce = new Announcements({
     message,
   });
   Announce.save().then((newAnnouncement) => {
+    req.flash('success_msg','New Announcement Has Been Posted To The Homepage ')
     res.redirect("/admin/users/announce");
   });
+}
+
 });
 router.get("/edit/announcement/:id", (req, res) => {
   User.find({}).then((users) => {
@@ -335,14 +423,36 @@ router.get("/edit/announcement/:id", (req, res) => {
         });
       });
     });
-  });
-
-  //res.send('edit route')
+ });
 });
 
 router.post("/edit/announcement/:id", (req, res) => {
-  // res.send('working')
   const announcementId = req.params.id;
+  let errors=[]
+  const { message } = req.body;
+  if (!message) {
+    errors.push({ msg: "Please Fill This Form Field" });
+  }
+  if (message.length >= 50) {
+    errors.push({ msg: "Announcemet Message must be exactly 50 words or less" });
+  // req.flash("error_msg", "Announcemet Message must be exactly 50 words or less");
+  
+  }
+  if (errors.length > 0) {
+    User.find({})
+      .then(users=>{
+        Announcements.findById(announcementId)
+        .then(foundAnnouncement=>{
+          Announcements.find({})
+          .then(allAnnouncements=>{
+          return res.render('admin/edit-announce',{users,foundAnnouncement,allAnnouncements,message,errors})
+
+
+          })
+        })
+      })
+  
+   }
   const msgUpdate = req.body.message;
   Announcements.findOneAndUpdate(
     { _id: announcementId },
@@ -352,6 +462,7 @@ router.post("/edit/announcement/:id", (req, res) => {
       },
     }
   ).then((updatedMsg) => {
+    req.flash('success_msg','Updated Announcement Successfully')
     res.redirect("/admin/users/announce");
   });
 });
@@ -377,12 +488,31 @@ router.get("/users/questionaire/", (req, res) => {
 
 router.post("/users/questionaire/", (req, res) => {
   const { question, answer } = req.body;
+  let errors=[]
+
+  if (!question||!answer) {
+    errors.push({ msg: "Please Define Both A Question And A Answer" });
+  }
+  if (question.length >= 30) {
+    errors.push({ msg: "Please Your Question Phrase Must Be In A Range Of 10 Words Or Less " });
+  // req.flash("error_msg", "Announcemet Message must be exactly 50 words or less");
+  
+  }
+  if (errors.length > 0) {
+    User.find({}).then((users) => {
+      Questionaire.find({}).then((allQuestions) => {
+        return res.render("admin/questionaire", { users, allQuestions ,errors,question});
+      });
+    });
+
+  }
   // console.log(question,answer)
   const questAns = new Questionaire({
     question,
     answer,
   });
   questAns.save().then((questAnsSaved) => {
+    req.flash('success_msg','Added A Question And An Answer Successfully')
     res.redirect("/admin/users/questionaire");
   });
 });
@@ -403,9 +533,35 @@ router.get("/edit/questionaire/:id", (req, res) => {
 
 //Update Questionaire
 router.post("/users/questionaire/:id", (req, res) => {
+
   const questionId = req.params.id;
   const { question, answer } = req.body;
-  // console.log(question,answer)
+  let errors=[]
+
+  if (!question||!answer) {
+    errors.push({ msg: "Please Define Both A Question And A Answer" });
+  }
+  if (question.length >= 30) {
+    errors.push({ msg: "Please Your Question Phrase Must Be In A Range Of 10 Words Or Less " });
+  // req.flash("error_msg", "Announcemet Message must be exactly 50 words or less");
+}
+  if (errors.length > 0) {
+    User.find({}).then((users) => {
+      Questionaire.findById(questionId).then((questionAndAns) => {
+        Questionaire.find({}).then((allQuestions) => {
+         return  res.render("admin/edit-questionaire", {
+            questionAndAns,
+            users,
+            allQuestions,
+            errors
+          });
+        });
+      });
+
+  })
+}
+  
+ 
   Questionaire.findByIdAndUpdate(
     { _id: questionId },
     {
@@ -415,7 +571,7 @@ router.post("/users/questionaire/:id", (req, res) => {
       },
     }
   ).then((updatedQA) => {
-    //flash msg here
+    req.flash('success_msg','Updated Question And Answer Successfully')
     res.redirect("/admin/users/questionaire");
   });
   // res.send('workoingfwefrig')
@@ -445,6 +601,30 @@ router.post("/edituser/:id", (req, res) => {
   } = req.body;
   let {phoneNumber}=req.body
   let userId=req.params.id
+  let errors=[]
+
+  if (!name||!email||!sex||!location||!reason||!phoneNumber) {
+    errors.push({ msg: "Please Fill All Input Fields " });
+  }
+ 
+  if (errors.length > 0) {
+    User.findOne({ _id: userId }).then((user) => {
+    return  res.render("admin/edituser", { 
+      errors,
+      user,
+      name,
+      email,
+      sex,
+      location,
+      reason,
+
+     });
+    });
+
+
+
+  }
+  
 
 
 
@@ -486,6 +666,7 @@ router.post("/edituser/:id", (req, res) => {
   
   }})
   .then(userUpdate=>{
+    req.flash('success_msg',`Successfully Updated ${userUpdate.name}'s Profile`)
     res.redirect('/admin/payments')
   
   

@@ -1,6 +1,9 @@
 <%-include('../layouts/admin_header.ejs')%>
+<%-include('../layouts/flashes.ejs')%>
+
 <h1 class="text-center">All Payments here</h1>
 <hr />
+
 <div class="row ml-2">
 <div class="col-xl-3 col-md-6 mb-4">
   <div class="card border-left-danger shadow h-100 py-2">
@@ -49,18 +52,17 @@
 </div>
 
 </div>
-
 <div class="container">
   <div class="row">
     <%users.forEach(user=>{%>
     <div class="col-sm-12">
-      <div class="avatar white text-center">
+      <div class="avatar  text-center mg">
         <%if(user.uploader){%>
           <img
           src="/uploads/<%=user.uploader%>"
           width="130px"
-          height="100px"
-          class="img-fluid rounded-circle z-depth-1 pd-2"
+          height="130px"
+          class="img-fluid rounded-circle z-depth-1 ml-5  "
         />
 
       <%  }else{%>
@@ -102,10 +104,10 @@
             <%total+=parseFloat(pay.amount)%>
             <td><%=total%></td>
 
-            <td><a href="/admin/edit/payment/<%=pay._id%>" class="btn btn-outline-warning"> <i class="fas fa-edit mr-2" aria-hidden="true"></i> Edit Payment</a></td>
+            <td><a href="/admin/edit/payment/<%=pay._id%>" class="btn btn-primary"> <i class="fas fa-edit mr-2" aria-hidden="true"></i> Edit Payment</a></td>
             <td>
               <form action="/admin/deletepayment/<%=pay._id%>?_method=DELETE" method="POST">
-              <button type="submit" class="btn btn-outline-danger" 
+              <button type="submit" class="btn btn-warning" 
               onclick="return confirm('Are You Sure You Want To Delete This Payment?')"> <i class="fas fa-exclamation-triangle mr-2"> </i>Delete Payment</button>
             </form>
             </td>
@@ -122,18 +124,18 @@
 
           <td>
             <form action="/admin/delete/user/all/<%=user._id%>?_method=DELETE" method="POST"">
-              <button type="submit" class="btn btn-danger"
+              <button type="submit" class="btn btn-info"
               onclick="return confirm('Are You Sure You Want To Delete This User With Payment?')"> <i class="fas fa-exclamation-triangle mr-2"> </i>Delete User With Payments</button>
           </form>
         </td>
 
         <td>
           <form action="/admin/clear/user/all/<%=user._id%>?_method=DELETE" method="POST"">
-            <button type="submit" class="btn btn-outline-warning"
+            <button type="submit" class="btn btn-danger"
             onclick="return confirm('Are You Sure You Want To Delete All User Payment?')"><i class="fas fa-exclamation-circle mr-2"></i>Delete All User Payments</button>
         </form>
       </td>
-      <td><a href="/admin/edituser/<%=user._id%>" class="btn btn-outline-primary"> <i class="fas fa-user-circle mr-2"></i>Edit User Profile
+      <td><a href="/admin/edituser/<%=user._id%>" class="btn btn-primary"> <i class="fas fa-user-circle mr-2"></i>Edit User Profile
         </a></td>
 
           </tr>

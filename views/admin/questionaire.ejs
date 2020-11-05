@@ -1,4 +1,5 @@
 <%-include('../layouts/admin_header.ejs')%>
+
 <div class="container-fluid">
   <div class="row">
     <table class="table table-hover table-primary table-responsive-md">
@@ -55,12 +56,15 @@
         <p class="h4 mb-4 text-success">
           <i class="fas fa-question-circle">Add Recently Asked Questions</i>
         </p>
+        <%-include('../layouts/flashes.ejs')%>
+
         <input
           type="text"
           id="defaultContactFormName"
           class="form-control mb-4"
           placeholder="Question"
           name="question"
+          value="<%= typeof question != 'undefined' ? question : '' %>"
         />
         <!-- Message -->
         <div class="form-group">
@@ -75,9 +79,7 @@
         </div>
 
         <!-- Send button -->
-        <button class="btn btn-outline-success btn-block" type="submit">
-          Add
-        </button>
+        <button class="btn btn-success btn-block" type="submit">Add</button>
       </form>
 
       <!-- Default form contact -->
@@ -87,7 +89,7 @@
         <thead>
           <tr>
             <th>Qustion Date</th>
-            <th> Question</th>
+            <th>Question</th>
             <th>Answer To Question</th>
 
             <!-- <th scope="col">Amount</th> -->
@@ -102,7 +104,7 @@
             <td>
               <a
                 href="/admin/edit/questionaire/<%=question._id%>"
-                class="btn btn-outline-warning"
+                class="btn btn-warning"
                 >Edit Questionaire</a
               >
             </td>
@@ -113,7 +115,7 @@
               >
                 <button
                   type="submit"
-                  class="btn btn-outline-danger"
+                  class="btn btn-danger"
                   onclick="return confirm('Are You Sure You Want To Delete This Announcement?')"
                 >
                   Delete Questionaire
@@ -127,9 +129,7 @@
       </table>
     </div>
   </div>
-  <div class="row">
-      
-  </div>
+  <div class="row"></div>
 </div>
 
 <%-include('../layouts/admin_footer.ejs')%>

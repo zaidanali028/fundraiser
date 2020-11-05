@@ -45,19 +45,22 @@
 
     </table>
   </div>
+  <%-include('../layouts/flashes')%>
   <div class="row">
     <div class="col-md-6">
+      
       <!-- Default form contact -->
-      <form method="POST" class="text-center border border-light p-5" action="/admin/users/email/">
+      <form method="POST" class="text-center border border-light p-5" action="/admin/user/email/<%=aUser._id%>">
         <p class="h4 mb-4">Contact <%=aUser.name%></p>
 
-        <!-- Name -->
+        
         <input
           type="text"
           id="defaultContactFormName"
           class="form-control mb-4"
           placeholder="Subject To Address"
           name="subject"
+          value="<%= typeof subject != 'undefined' ? subject : '' %>"
         />
 
        
@@ -71,26 +74,27 @@
             cols="30"
             placeholder="Message"
             name="message"
-          ></textarea>
+            
+          ><%= typeof message != 'undefined' ? message : '' %></textarea>
         </div>
 
        
 
         <!-- Send button -->
-        <button class="btn btn-outline-primary btn-block" type="submit">Send</button>
+        <button class="btn btn-primary btn-block" type="submit">Send</button>
       </form>
       <!-- Default form contact -->
     </div>
     <div class="col-md-6 mt-5 ">
       <h1 class="text-center">Members Details here</h1>
       <hr>
-      <div class="avatar white text-center">
+      <div class="avatar  text-center">
         <%if(aUser.uploader){%>
           <img
           src="/uploads/<%=aUser.uploader%>"
           width="12%"
           height="100px"
-          class="img-fluid rounded-circle z-depth-1 pd-2"
+          class="img-fluid rounded-circle z-depth-1 pd-2   mg-interact"
         />
 
       <%  }else{%>
