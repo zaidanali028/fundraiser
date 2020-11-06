@@ -58,10 +58,39 @@
 <!-- MDB core JavaScript -->
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.19.1/js/mdb.min.js"></script>
 
+<!-- toastr -->
+<script src="/js/toastr.js"></script>
+
   <script>
-    function exec(){
+
+  window.onload = function(){
+
+// Success messages
+    <%  
+      if(success_msg != ""){ %>
+
+    toastr.success('<%= success_msg %>')
+        
+      <% } %>
+    
+     
+// Error messages
+      <%  
+
+      if(error_msg != ""){ %>
+
+    toastr.error('<%= error_msg %>')
+        
+      <% } %>
+
+
+  function exec(){
       window.print()
     }
+
+  }
+
+  
     
   </script>
 

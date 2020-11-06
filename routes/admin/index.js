@@ -139,12 +139,13 @@ router.post("/pateron/pay/", (req, res) => {
   // console.log(amount);
   User.findById(id).then((user) => {
     const newPay = new Payment({
-      amount: amount,
+      amount,
       userId: user._id,
     });
     user.payment.push(newPay);
     user.save().then((savedpayment) => {
       newPay.save().then((payment) => {
+        req.flash('success_msg', 'Payment Successful')
         res.redirect("/admin/payments");
       });
     });
@@ -182,6 +183,7 @@ router.delete("/deletepayment/:id", (req, res) => {
   const { id } = req.params;
   Payment.findOneAndDelete({ _id: id }).then((payment) => {
     payment.remove();
+    req.flash('error_msg', 'Payment Was Deleted')
     res.redirect("/admin/payments");
   });
 });
