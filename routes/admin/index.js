@@ -9,7 +9,7 @@ const Questionaire = require("../../models/Questionaire");
 const {ensureAuthenticated}=require('../../config/auth')
 const {adminAuth}=require('../../config/adminAuth')
 const key =
-  "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";
+  "";
 
 router.get("/",ensureAuthenticated,adminAuth ,(req, res) => {
   const Data = [
