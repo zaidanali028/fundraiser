@@ -1,13 +1,21 @@
 <%-include('../layouts/home_header.ejs')%>
+<%-include('../layouts/flashes.ejs')%>
+
 <form action="/register" method="POST" enctype="multipart/form-data">
 <label for="name">Name</label>
-<input type="text" name="name" id="">
+<input type="text" required name="name" id="" value="<%=typeof name != 'undefined'? name:''%>">
+                                                    
 
-<label for="name">Email</label>
-<input type="text" name="email" id="">
-<!-- 
-<label for="name">Password</label>
-<input type="text" name="password" id=""> -->
+<label for="email">Email</label>
+<input type="email" required name="email" id="" value="<%=typeof email != 'undefined'? email:''%>">
+
+
+<label for="password">Password</label>
+<input type="password" required name="password" id="">
+
+<label for="passwordConfirm">Confirm Password</label>
+<input type="password" required name="passwordConfirm" id="">
+
 <label for="file">Your Picture</label>
 <input type="file" name="uploader">
 <label for="sex">Sex</label>
@@ -15,13 +23,13 @@ Male<input type="radio" name="sex"  value="Male" id="">
 Female<input type="radio" name="sex" value="Female" id="">
 
 <label for="Phone Number">Phone Number</label>
-<input type="text" name="phoneNumber" id="">
+<input type="text" name="phoneNumber" id="" placeholder="Strart with 0...... " value="<%=typeof phoneNumber != 'undefined'? phoneNumber:''%>">
 
 <label for="Location">Location</label>
-<input type="text" name="location" id="">
+<input type="text" name="location" id="" value="<%=typeof location != 'undefined'? location:''%>">
 
 <label for="reason">What Is Making You See The Need To Join Us</label>
-<textarea name="reason" id="" cols="30" rows="10"></textarea>
+<textarea name="reason" id="" cols="30" rows="10"><%=typeof reason != 'undefined'? reason:''%>"</textarea>
 
 <button type="submit">Register</button>
 </form>

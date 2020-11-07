@@ -4,6 +4,9 @@
 .mg {
   margin-left: 420px;
 }
+.move{
+  margin-right: 397px;
+}
 .mg-interact{
   margin-left: 310px;
 
@@ -12,7 +15,7 @@
 
 @media screen and (max-width: 411px) {
   .mg {
-    margin-left: 30px;
+    margin-right: 40px;
   }
   .mg-interact{
      margin-left: 110px;
@@ -36,3 +39,13 @@
      margin-left: 270px;
    }
  }
+
+ @media screen and (max-width: 375px) {
+  .mg {
+    margin-left: 0px;
+  }
+ .mg-interact{
+  margin-left: 90px;
+  
+
+}

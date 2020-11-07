@@ -47,7 +47,47 @@
     </div>
   </div>
 </div>
+
 <button class="btn btn-success h-25 mt-4" onclick="exec()">Print Statement</button>
+</div>
+
+<div class="container text-center">
+  <p>Members Who Had Made Payments This Month</p>
+  <!-- <hr> -->
+  <table class="table table-striped table-bordered table-responsive-md">
+    <thead>
+      <tr>
+        <th>Member's Name</th>
+        <th>Date Paid</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+      <%  payerArray.forEach(pay=>{%>
+          <td><%=pay.payerName%></td>
+          <td><%=pay.paymentDate%></td>
+          <td><%=pay.paymentAmount%></td>
+         
+        </tr>
+       <%   }) %>
+       <tr>
+        <td><strong>Monthly Total</strong> </td>
+        <td><%=totalForMonth%></td>
+      </tr>
+      
+
+    
+     
+
+       
+     
+
+
+    </tbody>
+  </table>
+       
+ 
 </div>
 
 <div class="container">

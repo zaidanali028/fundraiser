@@ -6,25 +6,26 @@ const router = express.Router();
 const sgMail = require("@sendgrid/mail");
 const Announcements = require("../../models/Announce");
 const Questionaire = require("../../models/Questionaire");
-
+const key =
+  "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";
 
 router.get("/", (req, res) => {
-  let novemberData=''
-  const Currentmonth=new Date().getMonth()+1
-  Payment.find({})
-  .then(payments=>{
-    payments.forEach(payment=>{
-      const dbMonth=new Date(payment.createdAt).getMonth()+1
-      if(Currentmonth===11&&Currentmonth===dbMonth){
-       novemberData=Payment.countDocuments({})
-        console.log(novemberData)
-      }
-      res.render('admin/index',{novemberData})
-    })
-  })
+  const Data = [
+    Payment.count({}).exec(),
+    User.count({}).exec(),
+    Announcements.count({}).exec(),
+    Questionaire.count({}).exec(),
+  ];
+  Promise.all(Data).then(([payments, users, announcements, questions]) => {
+    res.render("admin/index", { payments, users, announcements, questions });
+  });
 });
 
 router.get("/payments", async (req, res) => {
+  let payer = "";
+  let date = "";
+  let amount = "";
+  let payerArray = [];
   let totalForMonth = 0;
   let totalForYear = 0;
 
@@ -33,7 +34,7 @@ router.get("/payments", async (req, res) => {
   //console.log(currentYear)
 
   // get all payments from the database
-  const allPayments = await Payment.find({});
+  const allPayments = await Payment.find({}).populate("userId");
 
   for (const singlePayment of allPayments) {
     let currentM = new Date(singlePayment.createdAt).getMonth() + 1;
@@ -41,6 +42,16 @@ router.get("/payments", async (req, res) => {
 
     if (currentM === currentMonth && currentY === currentYear) {
       totalForMonth += parseFloat(singlePayment.amount);
+      payer = singlePayment.userId.name;
+      date = new Date(singlePayment.date).toDateString();
+      amount = singlePayment.amount;
+      payerArray.push({
+        payerName: payer,
+        paymentDate: date,
+        paymentAmount: amount,
+      });
+
+      // console.log(payer)
     }
     //Getting yearly total
     if (currentY === currentYear) {
@@ -71,12 +82,18 @@ router.get("/payments", async (req, res) => {
           sum,
           totalForMonth,
           totalForYear,
+          allPayments,
+          payerArray,
         });
       });
     });
 });
 
 router.get("/print", (req, res) => {
+  let payer = "";
+  let date = "";
+  let amount = "";
+  let payerArray = [];
   let totalForMonth = 0;
   let totalForYear = 0;
   const currentMonth = new Date().getMonth() + 1; // Get current month
@@ -84,7 +101,8 @@ router.get("/print", (req, res) => {
   //console.log(currentYear)
 
   // get all payments from the database
-  Payment.find({}).then((payment) => {
+  Payment.find({}).populate("userId")
+  .then((payment) => {
     payment.forEach((pay) => {
       // console.log(pay.amount);
       let currentM = new Date(pay.createdAt).getMonth() + 1;
@@ -92,6 +110,15 @@ router.get("/print", (req, res) => {
 
       if (currentM === currentMonth && currentY === currentYear) {
         totalForMonth += parseFloat(pay.amount);
+        payer = pay.userId.name;
+        console.log(payer)
+        date = new Date(pay.date).toDateString();
+        amount = pay.amount;
+        payerArray.push({
+          payerName: payer,
+          paymentDate: date,
+          paymentAmount: amount,
+        });
       }
 
       //Getting yearly total
@@ -120,7 +147,13 @@ router.get("/print", (req, res) => {
         // console.log(sum)
         // console.log(paymentArray)
 
-        res.render("admin/print", { users, sum, totalForMonth, totalForYear });
+        res.render("admin/print", {
+          users,
+          sum,
+          totalForMonth,
+          totalForYear,
+          payerArray,
+        });
       });
     });
 });
@@ -145,7 +178,7 @@ router.post("/pateron/pay/", (req, res) => {
     user.payment.push(newPay);
     user.save().then((savedpayment) => {
       newPay.save().then((payment) => {
-        req.flash('success_msg', 'Payment Successful')
+        req.flash("success_msg", "Payment Successful");
         res.redirect("/admin/payments");
       });
     });
@@ -173,6 +206,7 @@ router.post("/edit/payment/:id", (req, res) => {
       },
     }
   ).then((updatedPayment) => {
+    req.flash("success_msg", "Succeded In Updating Payment Field");
     res.redirect("/admin/payments");
   });
 });
@@ -183,7 +217,7 @@ router.delete("/deletepayment/:id", (req, res) => {
   const { id } = req.params;
   Payment.findOneAndDelete({ _id: id }).then((payment) => {
     payment.remove();
-    req.flash('error_msg', 'Payment Was Deleted')
+    req.flash("error_msg", "Payment Was Deleted");
     res.redirect("/admin/payments");
   });
 });
@@ -193,6 +227,7 @@ router.delete("/delete/user/:id", (req, res) => {
   const userId = req.params.id;
   User.findByIdAndDelete({ _id: userId }).then((user) => {
     user.remove();
+    req.flash("error_msg", "User Deleted");
     res.redirect("/admin/payments");
   });
 });
@@ -212,6 +247,7 @@ router.delete("/delete/user/all/:id", (req, res) => {
         });
       }
       user.remove();
+      req.flash("error_msg", "Deleted User With Payments!");
       res.redirect("/admin/payments");
     });
 });
@@ -230,6 +266,7 @@ router.delete("/clear/user/all/:id", (req, res) => {
           payment.remove();
         });
       }
+      req.flash("error_msg", `All ${user.name} 's Payments Have Been Deleted `);
       res.redirect("/admin/payments");
     });
 });
@@ -251,35 +288,29 @@ router.get("/user/email/:id", (req, res) => {
 });
 
 router.post("/user/email/:id", (req, res) => {
-// console.log(req.body)
-  let errors=[]
+  // console.log(req.body)
+  let errors = [];
   const userId = req.params.id;
   const { subject } = req.body;
   const { message } = req.body;
-  
-  if(!subject || !message){
+
+  if (!subject || !message) {
     errors.push({ msg: "Please fill in All Fields" });
-}
-if (errors.length > 0) {
-  User.find({}).then(users=>{
-    User.findById(userId)
-    .then(aUser=>{
-      return res.render('admin/interact-form',{
-        errors,
-        subject,
-        message,
-        users,
-        aUser
-      })
-
-    })
-   
-
-  })
-
-
-}
-   User.findById(userId).then((user) => {
+  }
+  if (errors.length > 0) {
+    User.find({}).then((users) => {
+      User.findById(userId).then((aUser) => {
+        return res.render("admin/interact-form", {
+          errors,
+          subject,
+          message,
+          users,
+          aUser,
+        });
+      });
+    });
+  }
+  User.findById(userId).then((user) => {
     sgMail.setApiKey(key);
     const msg = {
       to: user.email, // Change to your recipient
@@ -291,10 +322,7 @@ if (errors.length > 0) {
       .send(msg)
       .then(() => {
         console.log("Email sent");
-        req.flash(
-          "success_msg",
-          `Successfully sent an email to post with title ${user.name}`
-        );
+        req.flash("success_msg", `Successfully sent an email to  ${user.name}`);
         res.redirect("/admin/interact");
       })
       .catch((error) => {
@@ -316,32 +344,25 @@ router.get("/users/email", (req, res) => {
 
 router.post("/users/email", (req, res) => {
   const { subject, message } = req.body;
-  let errors=[]
+  let errors = [];
   const userId = req.params.id;
- 
-  
-  if(!subject || !message){
+
+  if (!subject || !message) {
     errors.push({ msg: "Please fill in All Fields" });
-}
-if (errors.length > 0) {
-  User.find({})
-  .then(users=>{
-    User.count({}).then((userCount) => {
-
-    return res.render('admin/mailall',{
-      errors,
-      subject,
-      message,
-      users,
-      userCount
-      
-    })
-
-  })
-})
-
-
-}
+  }
+  if (errors.length > 0) {
+    User.find({}).then((users) => {
+      User.count({}).then((userCount) => {
+        return res.render("admin/mailall", {
+          errors,
+          subject,
+          message,
+          users,
+          userCount,
+        });
+      });
+    });
+  }
   User.find({}).then((allUsers) => {
     allUsers.forEach((user) => {
       sgMail.setApiKey(key);
@@ -355,13 +376,9 @@ if (errors.length > 0) {
         .send(msg)
         .then(() => {
           console.log("Email sent to all members");
-          
-          req.flash(
-            "success_msg",
-            `Successfully Sent All-Emails`
-          );
+
+          req.flash("success_msg", `Successfully Sent All-Emails`);
           res.redirect("/admin/interact");
-          
         })
         .catch((error) => {
           console.error(error);
@@ -380,38 +397,42 @@ router.get("/users/announce/", (req, res) => {
 });
 //validation stage
 router.post("/users/announce/", (req, res) => {
-  let errors=[]
-const { message } = req.body;
-if (!message) {
-  errors.push({ msg: "Please Fill This Form Field" });
-}
-if (message.length >= 50) {
-  errors.push({ msg: "Announcemet Message must be exactly 50 characters or less" });
-// req.flash("error_msg", "Announcemet Message must be exactly 50 words or less");
+  let errors = [];
+  const { message } = req.body;
+  if (!message) {
+    errors.push({ msg: "Please Fill This Form Field" });
+  }
+  if (message.length >= 50) {
+    errors.push({
+      msg: "Announcemet Message must be exactly 50 characters or less",
+    });
+    // req.flash("error_msg", "Announcemet Message must be exactly 50 words or less");
+  }
+  //console.log(errors)
 
-}
-//console.log(errors)
-
-if (errors.length > 0) {
-  User.find({})
-    .then(users=>{
-      Announcements.find({})
-      .then(allAnnouncements=>{
-        return res.render('admin/announce',{users,allAnnouncements,message,errors})
-      })
-    })
-
-}
-else{  
-const Announce = new Announcements({
-    message,
-  });
-  Announce.save().then((newAnnouncement) => {
-    req.flash('success_msg','New Announcement Has Been Posted To The Homepage ')
-    res.redirect("/admin/users/announce");
-  });
-}
-
+  if (errors.length > 0) {
+    User.find({}).then((users) => {
+      Announcements.find({}).then((allAnnouncements) => {
+        return res.render("admin/announce", {
+          users,
+          allAnnouncements,
+          message,
+          errors,
+        });
+      });
+    });
+  } else {
+    const Announce = new Announcements({
+      message,
+    });
+    Announce.save().then((newAnnouncement) => {
+      req.flash(
+        "success_msg",
+        "New Announcement Has Been Posted To The Homepage "
+      );
+      res.redirect("/admin/users/announce");
+    });
+  }
 });
 router.get("/edit/announcement/:id", (req, res) => {
   User.find({}).then((users) => {
@@ -424,36 +445,37 @@ router.get("/edit/announcement/:id", (req, res) => {
         });
       });
     });
- });
+  });
 });
 
 router.post("/edit/announcement/:id", (req, res) => {
   const announcementId = req.params.id;
-  let errors=[]
+  let errors = [];
   const { message } = req.body;
   if (!message) {
     errors.push({ msg: "Please Fill This Form Field" });
   }
   if (message.length >= 50) {
-    errors.push({ msg: "Announcemet Message must be exactly 50 words or less" });
-  // req.flash("error_msg", "Announcemet Message must be exactly 50 words or less");
-  
+    errors.push({
+      msg: "Announcemet Message must be exactly 50 words or less",
+    });
+    // req.flash("error_msg", "Announcemet Message must be exactly 50 words or less");
   }
   if (errors.length > 0) {
-    User.find({})
-      .then(users=>{
-        Announcements.findById(announcementId)
-        .then(foundAnnouncement=>{
-          Announcements.find({})
-          .then(allAnnouncements=>{
-          return res.render('admin/edit-announce',{users,foundAnnouncement,allAnnouncements,message,errors})
-
-
-          })
-        })
-      })
-  
-   }
+    User.find({}).then((users) => {
+      Announcements.findById(announcementId).then((foundAnnouncement) => {
+        Announcements.find({}).then((allAnnouncements) => {
+          return res.render("admin/edit-announce", {
+            users,
+            foundAnnouncement,
+            allAnnouncements,
+            message,
+            errors,
+          });
+        });
+      });
+    });
+  }
   const msgUpdate = req.body.message;
   Announcements.findOneAndUpdate(
     { _id: announcementId },
@@ -463,7 +485,7 @@ router.post("/edit/announcement/:id", (req, res) => {
       },
     }
   ).then((updatedMsg) => {
-    req.flash('success_msg','Updated Announcement Successfully')
+    req.flash("success_msg", "Updated Announcement Successfully");
     res.redirect("/admin/users/announce");
   });
 });
@@ -489,23 +511,29 @@ router.get("/users/questionaire/", (req, res) => {
 
 router.post("/users/questionaire/", (req, res) => {
   const { question, answer } = req.body;
-  let errors=[]
+  let errors = [];
 
-  if (!question||!answer) {
+  if (!question || !answer) {
     errors.push({ msg: "Please Define Both A Question And A Answer" });
   }
   if (question.length >= 30) {
-    errors.push({ msg: "Please Your Question Phrase Must Be In A Range Of 10 Words Or Less " });
-  // req.flash("error_msg", "Announcemet Message must be exactly 50 words or less");
-  
+    errors.push({
+      msg:
+        "Please Your Question Phrase Must Be In A Range Of 10 Words Or Less ",
+    });
+    // req.flash("error_msg", "Announcemet Message must be exactly 50 words or less");
   }
   if (errors.length > 0) {
     User.find({}).then((users) => {
       Questionaire.find({}).then((allQuestions) => {
-        return res.render("admin/questionaire", { users, allQuestions ,errors,question});
+        return res.render("admin/questionaire", {
+          users,
+          allQuestions,
+          errors,
+          question,
+        });
       });
     });
-
   }
   // console.log(question,answer)
   const questAns = new Questionaire({
@@ -513,7 +541,7 @@ router.post("/users/questionaire/", (req, res) => {
     answer,
   });
   questAns.save().then((questAnsSaved) => {
-    req.flash('success_msg','Added A Question And An Answer Successfully')
+    req.flash("success_msg", "Added A Question And An Answer Successfully");
     res.redirect("/admin/users/questionaire");
   });
 });
@@ -534,35 +562,35 @@ router.get("/edit/questionaire/:id", (req, res) => {
 
 //Update Questionaire
 router.post("/users/questionaire/:id", (req, res) => {
-
   const questionId = req.params.id;
   const { question, answer } = req.body;
-  let errors=[]
+  let errors = [];
 
-  if (!question||!answer) {
+  if (!question || !answer) {
     errors.push({ msg: "Please Define Both A Question And A Answer" });
   }
   if (question.length >= 30) {
-    errors.push({ msg: "Please Your Question Phrase Must Be In A Range Of 10 Words Or Less " });
-  // req.flash("error_msg", "Announcemet Message must be exactly 50 words or less");
-}
+    errors.push({
+      msg:
+        "Please Your Question Phrase Must Be In A Range Of 10 Words Or Less ",
+    });
+    // req.flash("error_msg", "Announcemet Message must be exactly 50 words or less");
+  }
   if (errors.length > 0) {
     User.find({}).then((users) => {
       Questionaire.findById(questionId).then((questionAndAns) => {
         Questionaire.find({}).then((allQuestions) => {
-         return  res.render("admin/edit-questionaire", {
+          return res.render("admin/edit-questionaire", {
             questionAndAns,
             users,
             allQuestions,
-            errors
+            errors,
           });
         });
       });
+    });
+  }
 
-  })
-}
-  
- 
   Questionaire.findByIdAndUpdate(
     { _id: questionId },
     {
@@ -572,7 +600,7 @@ router.post("/users/questionaire/:id", (req, res) => {
       },
     }
   ).then((updatedQA) => {
-    req.flash('success_msg','Updated Question And Answer Successfully')
+    req.flash("success_msg", "Updated Question And Answer Successfully");
     res.redirect("/admin/users/questionaire");
   });
   // res.send('workoingfwefrig')
@@ -592,44 +620,29 @@ router.get("/edituser/:id", (req, res) => {
   });
 });
 router.post("/edituser/:id", (req, res) => {
-  const {
-    name,
-    email,
-    password,
-    sex,
-    location,
-    reason,
-  } = req.body;
-  let {phoneNumber}=req.body
-  let userId=req.params.id
-  let errors=[]
+  const { name, email, password, sex, location, reason } = req.body;
+  let { phoneNumber } = req.body;
+  let userId = req.params.id;
+  let errors = [];
 
-  if (!name||!email||!sex||!location||!reason||!phoneNumber) {
+  if (!name || !email || !sex || !location || !reason || !phoneNumber) {
     errors.push({ msg: "Please Fill All Input Fields " });
   }
- 
+
   if (errors.length > 0) {
     User.findOne({ _id: userId }).then((user) => {
-    return  res.render("admin/edituser", { 
-      errors,
-      user,
-      name,
-      email,
-      sex,
-      location,
-      reason,
-
-     });
+      return res.render("admin/edituser", {
+        errors,
+        user,
+        name,
+        email,
+        sex,
+        location,
+        reason,
+      });
     });
-
-
-
   }
-  
 
-
-
-  
   function isNotEmpty(object) {
     //am  checking if there is a key(uploader) in the object ,and if there is ,we will return true or false otherwise
     for (let key in object) {
@@ -644,7 +657,7 @@ router.post("/edituser/:id", (req, res) => {
   //console.log(req.files)
   if (isNotEmpty(req.files)) {
     const fileObject = req.files.uploader;
-    console.log(fileObject)
+    console.log(fileObject);
     fileName = new Date().getSeconds() + "-" + fileObject.name;
     //the new Date().getSeconds+'-'+ is there to prevent duplicate picturename
     fileObject.mv("./public/uploads/" + fileName, (err) => {
@@ -654,25 +667,28 @@ router.post("/edituser/:id", (req, res) => {
   } else {
     console.log("has nothing");
   }
- 
-  User.findByIdAndUpdate({_id:userId},{$set:{
-    name,
-    email,
-    password,
-    sex,
-    location,
-    reason,
-    phoneNumber,
-    uploader:fileName
-  
-  }})
-  .then(userUpdate=>{
-    req.flash('success_msg',`Successfully Updated ${userUpdate.name}'s Profile`)
-    res.redirect('/admin/payments')
-  
-  
-  })
-})
 
+  User.findByIdAndUpdate(
+    { _id: userId },
+    {
+      $set: {
+        name,
+        email,
+        password,
+        sex,
+        location,
+        reason,
+        phoneNumber,
+        uploader: fileName,
+      },
+    }
+  ).then((userUpdate) => {
+    req.flash(
+      "success_msg",
+      `Successfully Updated ${userUpdate.name}'s Profile`
+    );
+    res.redirect("/admin/payments");
+  });
+});
 
 module.exports = router;

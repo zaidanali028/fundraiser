@@ -50,6 +50,44 @@
     </div>
   </div>
 </div>
+<div class="container text-center">
+  <p>Members Who Had Made Payments This Month</p>
+  <!-- <hr> -->
+  <table class="table table-striped table-bordered table-responsive-md">
+    <thead>
+      <tr>
+        <th>Member's Name</th>
+        <th>Date Paid</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+      <%  payerArray.forEach(pay=>{%>
+          <td><%=pay.payerName%></td>
+          <td><%=pay.paymentDate%></td>
+          <td><%=pay.paymentAmount%></td>
+         
+        </tr>
+       <%   }) %>
+       <tr>
+        <td><strong>Monthly Total</strong> </td>
+        <td><%=totalForMonth%></td>
+      </tr>
+      
+
+    
+     
+
+       
+     
+
+
+    </tbody>
+  </table>
+       
+ 
+</div>
 
 </div>
 <div class="container">
@@ -64,13 +102,16 @@
           height="130px"
           class="img-fluid rounded-circle z-depth-1 ml-5  "
         />
-
-      <%  }else{%>
-        No pic
-
-       <% } %>
-        
+        <%  }else{%>
+          <p class="move">
+            No Picture For This Profile
+          </p>
+         <% } %>
       </div>
+
+
+   
+        
       <div class="text-center mt-2">
         <h6 class="font-weight-bold pt-2 mb-0"><%=user.name%></h6>
         <p class="text-muted mb-0"><small><%=user.email%></small></p>
@@ -87,7 +128,6 @@
         <thead>
           <tr>
             <th>Payment Date</th>
-            <th>Payment Id</th>
             <th>Amount Paid</th>
             <th>Total</th>
 
@@ -99,7 +139,6 @@
             <% let total=0 %> 
             <%user.payment.map(pay=>{ %>
             <td><%= new Date(pay.createdAt).toDateString() %></td>
-            <td><%=pay._id%></td>
             <td>₵<%=pay.amount%></td>
             <%total+=parseFloat(pay.amount)%>
             <td><%=total%></td>

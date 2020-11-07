@@ -74,12 +74,12 @@ var chart = new Chart(ctx, {
 
     // The data for our dataset
     data: {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July','August','September','October','November','December'],
+        labels: ['Payments', ' Members', 'Announcements', 'Questios Answered'],
         datasets: [{
             label: 'General Payments Statistics',
-            backgroundColor: 'rgb(255, 99, 132)',
-            borderColor: 'red',
-            data: [3 ,5, 5, 2, 2, 3, 4,7,4,4,<%=novemberData%>,2]
+            backgroundColor: '#3057c854',
+            borderColor: '#3057c8',
+            data: [<%=payments%> ,<%=users%>, <%=announcements%>, <%=questions%>]
         }]
     },
 

@@ -55,6 +55,9 @@ app.set("view engine", "ejs");
 app.set(express.static(path.join(__dirname, "public")));
 
 
+
+//Handling 404
+
 //declaring local variables for displaying FLASH messages
 app.use((req, res, next) => {
   res.locals.success_msg = req.flash("success_msg");
