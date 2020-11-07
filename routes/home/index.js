@@ -110,7 +110,7 @@ else{
     phoneNumber: ghPhoneNum,
     location,
     reason,
-    //  isAdmin:1
+   //  isAdmin:1
     // will uncomment this if I want a user to be an admin
   });
   bcrypt.genSalt(10, (err, salt) =>
@@ -170,7 +170,13 @@ router.get("/login", (req, res) => {
   res.render("home/login");
 });
 
-router.post("/login", (req, res) => {
-  res.send("logged in........");
-});
+router.post('/login',(req,res,next)=>{
+  passport.authenticate('local',{
+    successRedirect:'/admin/user',
+    failureRedirect:'/login',
+    failureFlash:true
+})(req,res,next)
+})
+
+
 module.exports = router;

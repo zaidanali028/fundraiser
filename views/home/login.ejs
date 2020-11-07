@@ -1,12 +1,12 @@
 <%-include('../layouts/home_header.ejs')%>
-
+<%-include('../layouts/flashes.ejs')%>
 <h1>Login Here</h1>
 <form action="/login" method="POST">
 <label for="">Email</label>
-<input type="email" name="" id="">
+<input type="email" name="email" id="">
 <br>
 <label for="">Password</label>
-<input type="text" placeholder="password">
+<input type="password" name="password" placeholder="password">
 <button type="submit">LOGIN</button>
 
 </form>

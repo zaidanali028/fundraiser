@@ -6,10 +6,12 @@ const router = express.Router();
 const sgMail = require("@sendgrid/mail");
 const Announcements = require("../../models/Announce");
 const Questionaire = require("../../models/Questionaire");
+const {ensureAuthenticated}=require('../../config/auth')
+const {adminAuth}=require('../../config/adminAuth')
 const key =
   "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";
 
-router.get("/", (req, res) => {
+router.get("/",ensureAuthenticated,adminAuth ,(req, res) => {
   const Data = [
     Payment.count({}).exec(),
     User.count({}).exec(),
@@ -21,7 +23,7 @@ router.get("/", (req, res) => {
   });
 });
 
-router.get("/payments", async (req, res) => {
+router.get("/payments",ensureAuthenticated,adminAuth, async (req, res) => {
   let payer = "";
   let date = "";
   let amount = "";
@@ -89,7 +91,7 @@ router.get("/payments", async (req, res) => {
     });
 });
 
-router.get("/print", (req, res) => {
+router.get("/print", ensureAuthenticated,adminAuth,(req, res) => {
   let payer = "";
   let date = "";
   let amount = "";
@@ -159,13 +161,13 @@ router.get("/print", (req, res) => {
 });
 
 //making payment
-router.get("/newpayment", (req, res) => {
+router.get("/newpayment",ensureAuthenticated,adminAuth, (req, res) => {
   User.find({}).then((users) => {
     res.render("admin/newpayment", { users });
   });
 });
 
-router.post("/pateron/pay/", (req, res) => {
+router.post("/pateron/pay/",ensureAuthenticated,adminAuth, (req, res) => {
   // res.send('success')
   const id = req.body.members;
   const { amount } = req.body;
@@ -185,13 +187,13 @@ router.post("/pateron/pay/", (req, res) => {
   });
 });
 
-router.get("/edit/payment/:id", (req, res) => {
+router.get("/edit/payment/:id",ensureAuthenticated,adminAuth, (req, res) => {
   const amountId = req.params.id;
   Payment.findOne({ _id: amountId }).then((payment) => {
     res.render("admin/editpayment", { payment });
   });
 });
-router.post("/edit/payment/:id", (req, res) => {
+router.post("/edit/payment/:id",ensureAuthenticated,adminAuth, (req, res) => {
   const amountId = req.params.id;
   const newAmount = req.body.amount;
   console.log(newAmount);
@@ -212,7 +214,7 @@ router.post("/edit/payment/:id", (req, res) => {
 });
 
 //deleting payment route
-router.delete("/deletepayment/:id", (req, res) => {
+router.delete("/deletepayment/:id", ensureAuthenticated,adminAuth,(req, res) => {
   // res.send('deleted')
   const { id } = req.params;
   Payment.findOneAndDelete({ _id: id }).then((payment) => {
@@ -223,7 +225,7 @@ router.delete("/deletepayment/:id", (req, res) => {
 });
 
 //Delete User
-router.delete("/delete/user/:id", (req, res) => {
+router.delete("/delete/user/:id", ensureAuthenticated,adminAuth,(req, res) => {
   const userId = req.params.id;
   User.findByIdAndDelete({ _id: userId }).then((user) => {
     user.remove();
@@ -233,7 +235,7 @@ router.delete("/delete/user/:id", (req, res) => {
 });
 
 //Delete User with payments
-router.delete("/delete/user/all/:id", (req, res) => {
+router.delete("/delete/user/all/:id",ensureAuthenticated,adminAuth, (req, res) => {
   //res.send('wwwooow')
   const userId = req.params.id;
   User.findOne({ _id: userId })
@@ -253,7 +255,7 @@ router.delete("/delete/user/all/:id", (req, res) => {
 });
 
 //Delete User's payments
-router.delete("/clear/user/all/:id", (req, res) => {
+router.delete("/clear/user/all/:id",ensureAuthenticated,adminAuth, (req, res) => {
   //res.send('wwwooow')
   const userId = req.params.id;
   User.findOne({ _id: userId })
@@ -270,13 +272,13 @@ router.delete("/clear/user/all/:id", (req, res) => {
       res.redirect("/admin/payments");
     });
 });
-router.get("/interact", (req, res) => {
+router.get("/interact",ensureAuthenticated,adminAuth, (req, res) => {
   User.find({}).then((users) => {
     res.render("admin/interact", { users });
   });
 });
 
-router.get("/user/email/:id", (req, res) => {
+router.get("/user/email/:id",ensureAuthenticated,adminAuth, (req, res) => {
   const userId = req.params.id;
   User.find({}).then((users) => {
     User.findOne({ _id: userId })
@@ -287,7 +289,7 @@ router.get("/user/email/:id", (req, res) => {
   });
 });
 
-router.post("/user/email/:id", (req, res) => {
+router.post("/user/email/:id", ensureAuthenticated,adminAuth,(req, res) => {
   // console.log(req.body)
   let errors = [];
   const userId = req.params.id;
@@ -334,7 +336,7 @@ router.post("/user/email/:id", (req, res) => {
   });
 });
 
-router.get("/users/email", (req, res) => {
+router.get("/users/email", ensureAuthenticated,adminAuth,(req, res) => {
   User.find({}).then((users) => {
     User.count({}).then((userCount) => {
       res.render("admin/mailall", { users, userCount });
@@ -342,7 +344,7 @@ router.get("/users/email", (req, res) => {
   });
 });
 
-router.post("/users/email", (req, res) => {
+router.post("/users/email",ensureAuthenticated,adminAuth, (req, res) => {
   const { subject, message } = req.body;
   let errors = [];
   const userId = req.params.id;
@@ -388,7 +390,7 @@ router.post("/users/email", (req, res) => {
   //console.log(subject,message)
 });
 
-router.get("/users/announce/", (req, res) => {
+router.get("/users/announce/",ensureAuthenticated,adminAuth, (req, res) => {
   User.find({}).then((users) => {
     Announcements.find({}).then((allAnnouncements) => {
       res.render("admin/announce", { users, allAnnouncements });
@@ -396,7 +398,7 @@ router.get("/users/announce/", (req, res) => {
   });
 });
 //validation stage
-router.post("/users/announce/", (req, res) => {
+router.post("/users/announce/",ensureAuthenticated,adminAuth, (req, res) => {
   let errors = [];
   const { message } = req.body;
   if (!message) {
@@ -434,7 +436,7 @@ router.post("/users/announce/", (req, res) => {
     });
   }
 });
-router.get("/edit/announcement/:id", (req, res) => {
+router.get("/edit/announcement/:id",ensureAuthenticated,adminAuth, (req, res) => {
   User.find({}).then((users) => {
     Announcements.find({}).then((allAnnouncements) => {
       Announcements.findById(req.params.id).then((foundAnnouncement) => {
@@ -448,7 +450,7 @@ router.get("/edit/announcement/:id", (req, res) => {
   });
 });
 
-router.post("/edit/announcement/:id", (req, res) => {
+router.post("/edit/announcement/:id",ensureAuthenticated,adminAuth, (req, res) => {
   const announcementId = req.params.id;
   let errors = [];
   const { message } = req.body;
@@ -490,7 +492,7 @@ router.post("/edit/announcement/:id", (req, res) => {
   });
 });
 
-router.delete("/delete/announcement/:id", (req, res) => {
+router.delete("/delete/announcement/:id",ensureAuthenticated,adminAuth, (req, res) => {
   const announcementId = req.params.id;
   // res.send('delete announcement')
   Announcements.findByIdAndDelete({ _id: announcementId }).then(
@@ -501,7 +503,7 @@ router.delete("/delete/announcement/:id", (req, res) => {
   );
 });
 
-router.get("/users/questionaire/", (req, res) => {
+router.get("/users/questionaire/",ensureAuthenticated,adminAuth, (req, res) => {
   User.find({}).then((users) => {
     Questionaire.find({}).then((allQuestions) => {
       res.render("admin/questionaire", { users, allQuestions });
@@ -509,7 +511,7 @@ router.get("/users/questionaire/", (req, res) => {
   });
 });
 
-router.post("/users/questionaire/", (req, res) => {
+router.post("/users/questionaire/", ensureAuthenticated,adminAuth,(req, res) => {
   const { question, answer } = req.body;
   let errors = [];
 
@@ -545,7 +547,7 @@ router.post("/users/questionaire/", (req, res) => {
     res.redirect("/admin/users/questionaire");
   });
 });
-router.get("/edit/questionaire/:id", (req, res) => {
+router.get("/edit/questionaire/:id",ensureAuthenticated,adminAuth, (req, res) => {
   const questionId = req.params.id;
   User.find({}).then((users) => {
     Questionaire.findById(questionId).then((questionAndAns) => {
@@ -561,7 +563,7 @@ router.get("/edit/questionaire/:id", (req, res) => {
 });
 
 //Update Questionaire
-router.post("/users/questionaire/:id", (req, res) => {
+router.post("/users/questionaire/:id", ensureAuthenticated,adminAuth,(req, res) => {
   const questionId = req.params.id;
   const { question, answer } = req.body;
   let errors = [];
@@ -606,20 +608,20 @@ router.post("/users/questionaire/:id", (req, res) => {
   // res.send('workoingfwefrig')
 });
 
-router.delete("/delete/questionaire/:id", (req, res) => {
+router.delete("/delete/questionaire/:id",ensureAuthenticated,adminAuth, (req, res) => {
   questionId = req.params.id;
   Questionaire.findByIdAndDelete({ _id: questionId }).then((question) => {
     question.remove();
     res.redirect("/admin/users/questionaire");
   });
 });
-router.get("/edituser/:id", (req, res) => {
+router.get("/edituser/:id",ensureAuthenticated,adminAuth, (req, res) => {
   const userId = req.params.id;
   User.findOne({ _id: userId }).then((user) => {
     res.render("admin/edituser", { user });
   });
 });
-router.post("/edituser/:id", (req, res) => {
+router.post("/edituser/:id",ensureAuthenticated,adminAuth, (req, res) => {
   const { name, email, password, sex, location, reason } = req.body;
   let { phoneNumber } = req.body;
   let userId = req.params.id;
