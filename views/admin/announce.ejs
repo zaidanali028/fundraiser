@@ -85,6 +85,8 @@
         <thead>
           <tr>
             <th> Broadcast Date</th>
+            <th>Broadcaster's Name</th>
+
             <th>Broadcast Message</th>
 
             <!-- <th scope="col">Amount</th> -->
@@ -94,6 +96,7 @@
            <% allAnnouncements.forEach(announcement=>{ %>
                 <tr>
                     <td><%=announcement.date.toDateString()%></td>
+                    <td><%=announcement.user.name%></td>
                     <td><%=announcement.message%></td>
                     <td><a href="/admin/edit/announcement/<%=announcement._id%>" class="btn btn-warning">Edit Announcement</a></td>
                     <td>
@@ -112,5 +115,6 @@
     </div>
   </div>
 </div>
+
 
 <%-include('../layouts/admin_footer.ejs')%>

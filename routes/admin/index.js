@@ -392,7 +392,8 @@ router.post("/users/email",ensureAuthenticated,adminAuth, (req, res) => {
 
 router.get("/users/announce/",ensureAuthenticated,adminAuth, (req, res) => {
   User.find({}).then((users) => {
-    Announcements.find({}).then((allAnnouncements) => {
+    Announcements.find({}).populate('user')
+    .then((allAnnouncements) => {
       res.render("admin/announce", { users, allAnnouncements });
     });
   });
@@ -426,6 +427,8 @@ router.post("/users/announce/",ensureAuthenticated,adminAuth, (req, res) => {
   } else {
     const Announce = new Announcements({
       message,
+      user:req.user._id
+      
     });
     Announce.save().then((newAnnouncement) => {
       req.flash(
@@ -622,7 +625,7 @@ router.get("/edituser/:id",ensureAuthenticated,adminAuth, (req, res) => {
   });
 });
 router.post("/edituser/:id",ensureAuthenticated,adminAuth, (req, res) => {
-  const { name, email, password, sex, location, reason } = req.body;
+  const { name, email, sex, location, reason } = req.body;
   let { phoneNumber } = req.body;
   let userId = req.params.id;
   let errors = [];
@@ -676,7 +679,6 @@ router.post("/edituser/:id",ensureAuthenticated,adminAuth, (req, res) => {
       $set: {
         name,
         email,
-        password,
         sex,
         location,
         reason,
@@ -692,5 +694,9 @@ router.post("/edituser/:id",ensureAuthenticated,adminAuth, (req, res) => {
     res.redirect("/admin/payments");
   });
 });
-
+router.get('/logout',(req,res)=>{
+  req.logOut()
+  req.flash('success_msg','You Have Successfully Logged Out')
+  res.redirect('/login')
+})
 module.exports = router;

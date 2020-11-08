@@ -7,8 +7,8 @@ const bcrypt = require("bcryptjs");
 const passport = require("passport");
 const sgMail = require("@sendgrid/mail");
 
-const key =
-  "";
+const key = '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'
+
 
 router.get("/", (req, res) => {
   res.send("welcome home");
@@ -145,7 +145,7 @@ We Hope To Do More For The Needy,Together With You,With Your Loyal Support,This 
                 console.log("Email sent");
                 req.flash(
                   "success_msg",
-                  `You Have Successfully Rgistered as <strong>${savedUser.name}</strong> And Can Login.Check Your Email For Confirmation`
+                  `You Have Successfully Registered as ${savedUser.name} And Can Login.Check Your Email For Confirmation`
                 );
                 res.redirect("/login");
               })
@@ -153,11 +153,7 @@ We Hope To Do More For The Needy,Together With You,With Your Loyal Support,This 
                 console.error(error);
               });
 
-            // req.flash(
-            //   "success_msg",
-            //   "You have successfully registered and can now login"
-            // );
-            // res.redirect("/login");
+           
           })
           .catch((err) => console.log(err));
       }
@@ -173,8 +169,10 @@ router.get("/login", (req, res) => {
 router.post('/login',(req,res,next)=>{
   passport.authenticate('local',{
     successRedirect:'/admin/user',
+    successFlash:true,
     failureRedirect:'/login',
     failureFlash:true
+    
 })(req,res,next)
 })
 
