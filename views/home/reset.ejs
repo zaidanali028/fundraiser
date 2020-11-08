@@ -1,0 +1,15 @@
+<%-include('../layouts/home_header.ejs')%>
+
+<div class="container">
+<form action="/reset" method="post">
+<h1>Frogot pwd form</h1>
+<label for="emil">Your Registered E-mail</label>
+<input type="text" class="form-control" name="email">
+
+<button type="submit" class="btn btn-primary">
+        Reset Password
+    </button>
+</form>
+</div>
+
+<%-include('../layouts/home_footer.ejs')%>

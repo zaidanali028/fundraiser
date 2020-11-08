@@ -13,6 +13,10 @@ const session = require("express-session");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
 const uploader = require("express-fileupload");
+const favicon = require('serve-favicon')
+const cookieParser = require('cookie-parser');
+const async = require('async');
+const crypto = require('crypto')
 
 const db = require("./config/keys");
 const dbUrI = db.dbUrl;
@@ -37,10 +41,15 @@ app.use(uploader());
 //body Parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use(cookieParser());
 //static files
 app.use(express.static(path.join(__dirname, "./public")));
 //method override to be used for sending put requests
 app.use(methodOverride("_method"));
+
+//cookieParser() should always come before session!
+app.use(cookieParser())
 
 app.use(
   session({

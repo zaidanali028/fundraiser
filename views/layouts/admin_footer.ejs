@@ -49,6 +49,8 @@
 <script src="/js/sb-admin-2.min.js"></script>
 <!-- Bootstrap switch -->
 <script src="/js/bootstrap-switch.min.js"></script>
+<!-- datatables js -->
+<script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
 
 <!-- md bootstrap -->
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.19.1/js/mdb.min.js"></script>
@@ -65,6 +67,7 @@
       if(success_msg != ""){ %>
 
     toastr.success('<%= success_msg %>')
+    
         
       <% } %>
     
@@ -77,6 +80,8 @@
     toastr.error('<%= error_msg %>')
         
       <% } %>
+
+        $("#dt").DataTable()
 
 
   
