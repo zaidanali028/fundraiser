@@ -1,4 +1,4 @@
-<%-include('../layouts/home_header.ejs')%>
+<%-include('../layouts/home_register.ejs')%>
 <%-include('../layouts/flashes.ejs')%>
 
 <form action="/register" method="POST" enctype="multipart/form-data">
@@ -30,7 +30,12 @@ Female<input type="radio" name="sex" required value="Female" id="">
 
 <label for="reason">What Is Making You See The Need To Join Us</label>
 <textarea name="reason" id="" cols="30" rows="10"><%=typeof reason != 'undefined'? reason:''%>"</textarea>
-
+<select name="role" id="">
+    <option value="Student">Student</option>
+    <option value="Graduate">Graduate</option>
+    <option value="Trader">Trader</option>
+    <option value="Philantropist">Philantropist</option>
+</select>
 <button type="submit">Register</button>
 </form>
 

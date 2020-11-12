@@ -11,6 +11,8 @@ const {adminAuth}=require('../../config/adminAuth')
 const key =
   "";
 
+  
+
 router.get("/",ensureAuthenticated,adminAuth ,(req, res) => {
   const Data = [
     Payment.count({}).exec(),

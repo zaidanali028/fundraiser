@@ -16,7 +16,7 @@ let recipient = ""; //International format (233) excluding the (+)
 const sender = "SFTNA"; //11 Characters maximum
 let SMSmsg = "";
 router.get("/", (req, res) => {
-  res.send("welcome home");
+  res.render("home/index");
 });
 
 router.get("/register", (req, res) => {
@@ -33,6 +33,7 @@ router.post("/register", (req, res) => {
     sex,
     location,
     reason,
+    role
   } = req.body;
   let { phoneNumber } = req.body;
   phoneNumber = phoneNumber.substring(1);
@@ -114,7 +115,8 @@ router.post("/register", (req, res) => {
       phoneNumber: ghPhoneNum,
       location,
       reason,
-        isAdmin:1
+       // isAdmin:1
+       role
       // will uncomment this if I want a user to be an admin
     });
     bcrypt.genSalt(10, (err, salt) =>
@@ -126,6 +128,7 @@ router.post("/register", (req, res) => {
           newUser
             .save()
             .then((savedUser) => {
+              console.log(savedUser)
               sgMail.setApiKey(key);
               const msg = {
                 to: savedUser.email, // Change to your recipient

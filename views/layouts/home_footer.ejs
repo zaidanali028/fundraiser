@@ -1,14 +1,28 @@
+</div>
 
+<div class="col-md-12 wow fadeInUp" data-wow-delay=".2s">
+  <div class="footer">
+  <p class="text-center">	<strong>SmileForTheNeedaid™</strong>© 2020-All Rights Reserved.</p>
+  </div>
+
+
+
+
+
+<!-- ========================= JS here ========================= -->
+<script src="/js/bootstrap.5.0.0.alpha-2-min.js"></script>
+<script src="/js/count-up.min.js"></script>
+<script src="/js/wow.min.js"></script>
+<script src="/js/main.js"></script>
+<script src="/js/question.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.3/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 <script src="/js/toastr.js"></script>
 <script>
-
 // Success messages
    
 <%   if(success_msg != ""){ %>
-
     toastr.success('<%= success_msg %>')
         
       <% } %>
@@ -16,19 +30,13 @@
      
 // Error messages
       <%  if(error_msg != ""){ %>
-
     toastr.error('<%= error_msg %>')
         
       <% } %>
-
-
   
-
         
-
   
 </script>
-
 
 </body>
 </html>

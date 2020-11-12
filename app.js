@@ -45,6 +45,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 //static files
 app.use(express.static(path.join(__dirname, "./public")));
+// favicon
+
+app.use(favicon(__dirname + '/public/img/favicon.ico'));
+
 //method override to be used for sending put requests
 app.use(methodOverride("_method"));
 
@@ -90,10 +94,14 @@ const adminRoutes=require('./routes/admin/index')
 const userRoute=require('./routes/user/index')
 const { dbUrl } = require("./config/keys");
 
-// //route usages
+ //route usages
 app.use('/',homeRoutes)
 app.use('/admin',adminRoutes)
 app.use('/admin/user',userRoute)
+
+app.get('*',(req,res,next)=>{
+  res.render('admin/page404')
+})
 app.listen(port, () => {
   console.log(`server running on port ${port}`);
 });
